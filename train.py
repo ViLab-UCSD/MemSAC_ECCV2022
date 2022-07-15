@@ -1,9 +1,7 @@
 import torch
-import pdb
 import torch.optim as optim
 import torch.nn as nn
-import model as model_no
-import advNetwork as ad
+from model import Resnet, AdversarialLayer
 import numpy as np
 import argparse
 import os
@@ -11,8 +9,6 @@ import os
 from memoryNetwork import queue_ila
 from data_list import ImageList
 import pre_process as prep
-import sampler
-from loss import Entropy, BSP
 
 import time
 
@@ -124,9 +120,9 @@ class predictor(nn.Module):
 
 
 class Encoder(nn.Module):
-    def __init__(self, bn_dim=256, total_classes=None):
+    def __init__(self, resnet, bn_dim=256, total_classes=None):
         super(Encoder, self).__init__()
-        self.model_fc = model_no.Resnet50Fc()
+        self.model_fc = Resnet(resnet)
         feature_len = self.model_fc.output_num()
         self.bottleneck_0 = nn.Linear(feature_len, bn_dim)
         self.bottleneck_0.weight.data.normal_(0, 0.005)
@@ -388,7 +384,7 @@ if __name__ == '__main__':
     print(f"{len(dataset_list)} target test samples")
 
     # network construction
-    base_network = Encoder(args.bn_dim, args.total_classes)
+    base_network = Encoder(args.resnet, args.bn_dim, args.total_classes)
     base_network = base_network.cuda()
 
     if args.method == 'DANN':
@@ -403,7 +399,7 @@ if __name__ == '__main__':
     my_discriminator.train(True)
 
     # gradient reversal layer
-    my_grl = ad.AdversarialLayer()
+    my_grl = AdversarialLayer()
 
     # criterion and optimizer
     criterion = {
