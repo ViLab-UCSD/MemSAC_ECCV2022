@@ -17,3 +17,4 @@
 tensorboard
 snapshot
 *.sh
+work_dirs
