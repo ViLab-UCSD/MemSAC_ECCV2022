@@ -39,13 +39,23 @@ if __name__ == '__main__':
 
     args = parser.parse_args() 
 
-    file_path = {
+
+    if args.dataset == "cub2011":
+        file_path = {
+            "cub": "./data_files/cub200/cub200_2011.txt" ,
+            "drawing": "./data_files/cub200/cub200_drawing.txt" ,
+        }
+    elif args.dataset == "domainNet":
+        file_path = {
         "real": "./data/DomainNet/real_test.txt" ,
         "sketch": "./data/DomainNet/sketch_test.txt" ,
         "painting": "./data/DomainNet/painting_test.txt" ,
         "clipart": "./data/DomainNet/clipart_test.txt"}
-    print("Target" , args.target)
+    else:
+        raise NotImplementedError
+
     dataset_test = file_path[args.target]
+    print("Target" , args.target)
 
     dataset_loaders = {}
 

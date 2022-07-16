@@ -55,6 +55,6 @@ class MemoryModule(nn.Module):
         self.key_features = source_features.detach()
 
         # dequeue and enqueue
-        sim_loss = self.sim_module(self.queue, self.queue_labels, target_features)
         self._dequeue_and_enqueue(self.key_features, source_labels)
+        sim_loss = self.sim_module(self.queue, self.queue_labels, target_features)
         return sim_loss

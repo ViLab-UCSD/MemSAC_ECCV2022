@@ -121,18 +121,18 @@ if __name__ == '__main__':
 
     if args.dataset == "cub2011":
         file_path = {
-            "cub": "./data/cub200/cub200_2011.txt" ,
-            "drawing": "./data/cub200/cub200_drawing.txt" ,
+            "cub": "./data_files/cub200/cub200_2011.txt" ,
+            "drawing": "./data_files/cub200/cub200_drawing.txt" ,
         }
         dataset_source = file_path[args.source]
         dataset_target = file_path[args.target]
         dataset_test = file_path[args.target]
     elif args.dataset == "domainNet":
         file_path = {
-            "real": "./data/DomainNet/real_train.txt" ,
-            "sketch": "./data/DomainNet/sketch_train.txt" ,
-            "painting": "./data/DomainNet/painting_train.txt" ,
-            "clipart": "./data/DomainNet/clipart_train.txt"}
+            "real": "./data_files/DomainNet/real_train.txt" ,
+            "sketch": "./data_files/DomainNet/sketch_train.txt" ,
+            "painting": "./data_files/DomainNet/painting_train.txt" ,
+            "clipart": "./data_files/DomainNet/clipart_train.txt"}
         dataset_source = file_path[args.source]
         dataset_target = file_path[args.target]
         dataset_test = file_path[args.target].replace("train" , "test")

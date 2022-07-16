@@ -16,5 +16,4 @@
 *__pycache__
 tensorboard
 snapshot
-*.sh
-work_dirs
+work_dirs/
