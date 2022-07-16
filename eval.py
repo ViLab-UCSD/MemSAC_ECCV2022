@@ -1,12 +1,10 @@
 import torch
-import torch.nn as nn
-import model as model_no
+from model import Encoder
 import numpy as np
 import argparse
 
-from data_list import ImageList
-import pre_process as prep
-from train import Encoder
+from load_images import ImageList
+import transforms
 
 class AverageMeter(object):
     """Computes and stores the average and current value"""
@@ -25,34 +23,6 @@ class AverageMeter(object):
         self.count += n
         self.avg = self.sum / self.count
 
-# class predictor(nn.Module):
-#     def __init__(self, feature_len, cate_num):
-#         super(predictor, self).__init__()
-#         self.classifier = nn.Linear(feature_len, cate_num)
-#         self.classifier.weight.data.normal_(0, 0.01)
-#         self.classifier.bias.data.fill_(0.0)
-
-#     def forward(self, features):
-#         activations = self.classifier(features)
-#         return (activations)
-
-# class fine_net(nn.Module):
-#     def __init__(self, total_classes):
-#         super(fine_net, self).__init__()
-#         self.model_fc = model_no.Resnet50Fc()
-#         feature_len = self.model_fc.output_num()
-#         self.bottleneck_0 = nn.Linear(feature_len, 256)
-#         self.bottleneck_0.weight.data.normal_(0, 0.005)
-#         self.bottleneck_0.bias.data.fill_(0.1)
-#         self.bottleneck_layer = nn.Sequential(self.bottleneck_0, nn.ReLU())
-#         self.classifier_layer = predictor(256, total_classes)
-
-#     def forward(self, x):
-#         features = self.model_fc(x)
-#         out_bottleneck = self.bottleneck_layer(features)
-#         logits = self.classifier_layer(out_bottleneck)
-#         return logits
-
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='MemSAC')
@@ -65,77 +35,34 @@ if __name__ == '__main__':
     parser.add_argument('--checkpoint' , type=str, help="Checkpoint to load from.")
     parser.add_argument('--multi_gpu', type=int, default=0, help="use dataparallel if 1")
     parser.add_argument('--data_dir', required=True)
+    parser.add_argument('--resnet', default="resnet50", help="Resnet backbone")
 
     args = parser.parse_args() 
 
-    if args.dataset in ["birds123" , "cub2011" , "domainNet" , "office-home"]:
-        if args.dataset == "domainNet":
-            file_path = {
-                "real": "./data/visDA_126/real.txt" ,
-                "sketch": "./data/visDA_126/sketch.txt" ,
-                "painting": "./data/visDA_126/painting.txt" ,
-                "clipart": "./data/visDA_126/clipart.txt"
-            }
-        elif args.dataset == "cub2011":
-            file_path = {
-                "cub": "./data/cub200/cub200_2011.txt" ,
-                "drawing": "./data/cub200/cub200_drawing.txt" ,
-            }
-        elif args.dataset == "birds123":
-            file_path = {
-                "c": "./data/birds123/bird123_cub2011.txt",
-                "n": "./data/birds123/bird123_nabirds_list.txt",
-                "i": "./data/birds123/bird123_ina_list_2017.txt"
-            }
-        elif args.dataset == "office-home":
-            file_path = {
-                "real_world": "./data/officeHome/Real_World.txt" ,
-                "art": "./data/officeHome/Art.txt",
-                "product": "./data/officeHome/Product.txt",
-            }
-        print("Target" , args.target)
-        dataset_test = file_path[args.target]
-    elif args.dataset == "domainNet_full":
-        file_path = {
-            "real": "./data/visDA_full/real_train.txt" ,
-            "sketch": "./data/visDA_full/sketch_train.txt" ,
-            "painting": "./data/visDA_full/painting_train.txt" ,
-            "clipart": "./data/visDA_full/clipart_train.txt"}
-        print("Target" , args.target)
-        dataset_test = file_path[args.target].replace("train" , "test")
-    # elif args.dataset== "imagenet_c":
-    #     file_path = {
-    #         "fog": "data/imagenet/imagenet_val_fog_2.txt",
-    #         "brightness": "data/imagenet/imagenet_val_brightness_2.txt",
-    #         "defocus_blur": "data/imagenet/imagenet_val_defocus_blur_2.txt",
-    #         "zoom_blur": "data/imagenet/imagenet_val_zoom_blur_2.txt",
-    #     }
-    #     dataset_test = file_path[args.target].replace("_2.txt" , "_5.txt")
-    else:
-        raise NotImplementedError
-
+    file_path = {
+        "real": "./data/DomainNet/real_test.txt" ,
+        "sketch": "./data/DomainNet/sketch_test.txt" ,
+        "painting": "./data/DomainNet/painting_test.txt" ,
+        "clipart": "./data/DomainNet/clipart_test.txt"}
+    print("Target" , args.target)
+    dataset_test = file_path[args.target]
 
     dataset_loaders = {}
 
-    dataset_list = ImageList(args.data_dir, open(dataset_test).readlines(), transform=prep.image_test(resize_size=256, crop_size=224))
+    dataset_list = ImageList(args.data_dir, open(dataset_test).readlines(), transform=transforms.image_test(resize_size=256, crop_size=224))
     print("Size of target dataset:" , len(dataset_list))
     dataset_loaders["test"] = torch.utils.data.DataLoader(dataset_list, batch_size=args.batch_size, shuffle=False,
                                                           num_workers=16, drop_last=False)
 
     # network construction
     print(args.nClasses)
-    my_fine_net = Encoder(256, args.nClasses)
-    my_fine_net = my_fine_net.cuda()
+    base_network = Encoder(args.resnet, 256, args.nClasses).cuda()
         
     accuracy = AverageMeter()
 
     saved_state_dict = torch.load(args.checkpoint)
-    try:
-        my_fine_net.load_state_dict(saved_state_dict, strict=True)
-    except:
-        saved_state_dict = {k.partition("module.")[-1]:v for k,v in saved_state_dict.items()}
-        my_fine_net.load_state_dict(saved_state_dict, strict=True)
-    my_fine_net.eval()
+    base_network.load_state_dict(saved_state_dict, strict=True)
+    base_network.eval()
     start_test = True
     iter_test = iter(dataset_loaders["test"])
     with torch.no_grad():
@@ -146,7 +73,7 @@ if __name__ == '__main__':
             labels = data[1]
             inputs = inputs.cuda()
             labels = labels.cuda()
-            _, outputs = my_fine_net(inputs)
+            _, outputs = base_network(inputs)
             predictions = outputs.argmax(1)
             correct = torch.sum((predictions == labels).float())
             accuracy.update(correct/len(outputs), len(outputs))

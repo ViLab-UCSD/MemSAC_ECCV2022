@@ -71,7 +71,6 @@ class MSCLoss(nn.Module):
 
     def forward(self, source_features, source_labels, target_features):
 
-        self.iter += 1
         n_tgt = len(target_features)
 
         sim_matrix = self.__get_sim_matrix(source_features, target_features)

@@ -5,13 +5,10 @@ from torchvision import models
 import numpy as np
 
 
-__all__ = []
-
-
 class Resnet(nn.Module):
-  def __init__(self, resnet, pretrained=True):
+  def __init__(self, resnet_n, pretrained=True):
     super().__init__()
-    model_resnet = getattr(models, resnet)(pretrained=pretrained)
+    model_resnet = getattr(models, resnet_n)(pretrained=pretrained)
     self.conv1 = model_resnet.conv1
     self.bn1 = model_resnet.bn1
     self.relu = model_resnet.relu
@@ -60,7 +57,63 @@ class AdversarialLayer(torch.autograd.Function):
         coeff = np.float(lamb * (high - low) / (1.0 + np.exp(-alpha*iter_num / max_iter)) - (high - low) + low)
         return -coeff * gradOutput
 
-  
+class discriminator(nn.Module):
+    def __init__(self, feature_len, total_classes):
+        super().__init__()
+
+        self.ad_layer1 = nn.Linear(feature_len * total_classes, 1024)
+        self.ad_layer1.weight.data.normal_(0, 0.01)
+        self.ad_layer1.bias.data.fill_(0.0)
+        self.fc1 = nn.Sequential(self.ad_layer1, nn.ReLU(), nn.Dropout(0.5))
+
+        self.ad_layer2 = nn.Linear(1024, 1024)
+        self.ad_layer2.weight.data.normal_(0, 0.01)
+        self.ad_layer2.bias.data.fill_(0.0)
+        self.ad_layer3 = nn.Linear(1024, 1)
+        self.ad_layer3.weight.data.normal_(0, 0.3)
+        self.ad_layer3.bias.data.fill_(0.0)
+        self.fc2_3 = nn.Sequential(self.ad_layer2, nn.ReLU(), nn.Dropout(0.5), self.ad_layer3)
+
+    def forward(self, x, y):
+        op_out = torch.bmm(y.unsqueeze(2), x.unsqueeze(1))
+        ad_in = op_out.view(-1, y.size(1) * x.size(1))
+        f2 = self.fc1(ad_in)
+        f = self.fc2_3(f2)
+        return f
+
+
+class Classifier(nn.Module):
+    def __init__(self, feature_len, cate_num):
+        super().__init__()
+        self.classifier = nn.Linear(feature_len, cate_num)
+        self.classifier.weight.data.normal_(0, 0.01)
+        self.classifier.bias.data.fill_(0.0)
+
+    def forward(self, features):
+        activations = self.classifier(features)
+        return (activations)
+
+
+class Encoder(nn.Module):
+    def __init__(self, resnet, bn_dim=256, total_classes=None):
+        super(Encoder, self).__init__()
+        self.model_fc = Resnet(resnet)
+        feature_len = self.model_fc.output_num()
+        self.bottleneck_0 = nn.Linear(feature_len, bn_dim)
+        self.bottleneck_0.weight.data.normal_(0, 0.005)
+        self.bottleneck_0.bias.data.fill_(0.1)
+        self.bottleneck_layer = nn.Sequential(self.bottleneck_0, nn.ReLU(), nn.BatchNorm1d(bn_dim))
+        self.total_classes = total_classes
+        if total_classes:
+            self.classifier_layer = Classifier(bn_dim, total_classes)
+
+    def forward(self, x):
+        features = self.model_fc(x)
+        out_bottleneck = self.bottleneck_layer(features)
+        if not self.total_classes:
+            return (out_bottleneck, None)
+        logits = self.classifier_layer(out_bottleneck)
+        return (out_bottleneck, logits)
 
 # class Resnet34(nn.Module):
 #   def __init__(self):
