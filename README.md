@@ -1,9 +1,8 @@
+# MemSAC: ECCV 2022
 
+We present MemSAC (Memory Augmented Sample Consistency for Large-Scale Domain Adaptation) for unsupervised domain adaptation across datasets with many categories or fine-grained classes. 
 
-# MemSAC
-
-MemSAC: Memory Augmented Sample Consistency for Large-Scale Domain Adaptation 
-ECCV 2022
+![MemSAC_Teaser](assets/Teaser_contrastive.jpg)
 
 ## The following dependencies are required.
 
@@ -26,12 +25,17 @@ Download the datasets into folder called `data/`.
 
 To train the model on DomainNet, run the following script.
 ```
-bash jobs/domainNet_345.sh <source> <target> <Path for DomainNet dataset>
+bash jobs/domainNet_345.sh <source> <target> <Path for DomainNet dataset> <queue_size>
+```
+
+For example,
+```
+bash jobs/domainNet_345.sh real clipart ./data/DomainNet/ 48000
 ```
 
 To train the model on CUB-Drawings, run the following script.
 ```
-bash jobs/cub200.sh <source> <target> <Path for cub2011 dataset>
+bash jobs/cub200.sh <source> <target> <Path for cub2011 dataset> <queue_size>
 ```
 
 ## Testing using trained model.
@@ -40,23 +44,17 @@ To directly test our trained model, download the models available at the followi
 
  Method        | Trained Model  |
 | ------------- |:-----|
-| Real -> Clipart | [Link](https://drive.google.com/file/d/1rtzZDwnCZJm3oz7dvb2hWukUPHEb4tCZ/view?usp=sharing) |
-| Painting -> Real |   [Link](https://drive.google.com/file/d/1qDr5TEAWGujBMY9yr8jSAKDxRVx-bt1r/view?usp=sharing)   |
-| Drawing -> CUB |   [Link](https://drive.google.com/file/d/1ngeSrrxgzhgRt4V-zpX4mRMGnRwKKIM2/view?usp=sharing)  |
+| DomainNet | [Link](https://drive.google.com/drive/folders/1JpWG_Pdbt2G6PBAv7Ed-vWjB5Ct5-Qqp?usp=sharing) |
+| CUB-200 |   [Link](https://drive.google.com/drive/folders/1akY4kZSz7ML5TkY15NhIDYKDttTXV-ye?usp=sharing)   |
 
-##### Drawings -> CUB
+##### CUB-200 dataset
 ```
 python eval.py --nClasses 200 --checkpoint drawing_cub.pth.tar --data_dir <Path for cub2011 dataset> --batch_size 64 --dataset cub2011 --target cub
 ```
 
-##### real -> clipart
+##### DomainNet
 ```
-python eval.py --nClasses 345 --checkpoint real_clipart.pth.tar --data_dir <Path for domainNet dataset>  --dataset domainNet_full --target clipart
-```
-
-##### painting -> real
-```
-python eval.py --nClasses 345 --checkpoint painting_real.pth.tar --data_dir <Path for domainNet dataset> --dataset domainNet_full--target real
+python eval.py --nClasses 345 --checkpoint real_clipart.pth.tar --data_dir <Path for domainNet dataset>  --dataset domainNet --target clipart
 ```
 
 If you find MemSAC useful for your work please cite:
