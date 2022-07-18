@@ -12,7 +12,6 @@
 *.tar
 *.csv
 *.png
-*.jpg
 *__pycache__
 tensorboard
 snapshot
