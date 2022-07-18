@@ -1,9 +1,9 @@
 import torch
 import torch.nn as nn
-import contrastive as cl
+import model.contrastive as cl
 
 class MemoryModule(nn.Module):
-    def __init__(self, dim, K=65536, m=0.999, T=0.007, knn=5, top_ranked_n=32, ranking_k=4, knn_method="ranking", batch_size=32, similarity_func="cosine"):
+    def __init__(self, dim, K=48000, m=0, T=0.007, knn=5, top_ranked_n=32, ranking_k=4, knn_method="ranking", batch_size=32, similarity_func="cosine"):
         """
         dim: feature dimension (default: 128)
         K: queue size (default: 65536)

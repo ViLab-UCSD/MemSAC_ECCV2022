@@ -1,4 +1,4 @@
-# MemSAC: ECCV 2022
+# MemSAC (ECCV 2022)
 
 We present MemSAC (Memory Augmented Sample Consistency for Large-Scale Domain Adaptation) for unsupervised domain adaptation across datasets with many categories or fine-grained classes. 
 

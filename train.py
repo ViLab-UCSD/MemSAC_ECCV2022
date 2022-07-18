@@ -1,14 +1,14 @@
 import torch
 import torch.optim as optim
 import torch.nn as nn
-from model import Encoder, AdversarialLayer, discriminator
+from model.model import Encoder, AdversarialLayer, discriminator
 import numpy as np
 import argparse
 import os
 
-from memory import MemoryModule
-from load_images import ImageList
-import transforms
+from model.memory import MemoryModule
+from data_loader.load_images import ImageList
+import data_loader.transforms as transforms
 
 from torch.utils.tensorboard import SummaryWriter
 
@@ -66,13 +66,10 @@ if __name__ == '__main__':
     parser.add_argument('--lr', type=float, nargs='?', default=0.03, help="target dataset")
     parser.add_argument('--max_iteration', type=int, nargs='?', default=102500, help="target dataset")
     parser.add_argument('--out_dir', type=str, nargs='?', default='e', help="output dir")
-    # parser.add_argument('--sim_net', type=int, default=0, help="whether add source CAS")
     parser.add_argument('--batch_size', type=int, default=32, help="batch size should be samples * classes")
     parser.add_argument('--data_dir', type=str, default="./data", help="Path for data directory")
     parser.add_argument('--multi_gpu', type=int, default=0)
-    # parser.add_argument('--n_samples', type=int, default=2, help='number of samples from each src class')
     parser.add_argument('--total_classes', type=int, default=31, help="total # classes in the dataset")
-    # parser.add_argument('--n_sub_classes', type=int, default=10, help="number of classes sampled in batch")
 
     ## Testing parameters
     parser.add_argument('--test_10crop', action="store_true", help="10 crop testing")
@@ -112,7 +109,6 @@ if __name__ == '__main__':
     out_file = open(out_file, "w")
     best_file = os.path.join(out_dir, "best.txt")
     args.multi_gpu = bool(args.multi_gpu)
-    # args.source_subset_sampler = bool(args.sim_net)
     print(args)
 
     ##### TensorBoard & Misc Setup #####
@@ -212,11 +208,6 @@ if __name__ == '__main__':
     
     memory_network = MemoryModule(args.bn_dim, K=args.queue_size, m=args.momentum, T=args.tau, knn=args.k, top_ranked_n=args.top_ranked_n, similarity_func=args.simi_func, batch_size=batch_size["train"], ranking_k=args.ranking_k)
     memory_network = memory_network.cuda()
-
-    len_source = len(dataset_loaders["source"]) - 1
-    len_target = len(dataset_loaders["target"]) - 1
-    iter_source = iter(dataset_loaders["source"])
-    iter_target = iter(dataset_loaders["target"])
 
     with open(os.path.join(out_dir , "best.txt"), "a") as fh:
         fh.write("Best Accuracy file\n")

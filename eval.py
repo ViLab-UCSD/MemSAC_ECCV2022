@@ -18,8 +18,7 @@ class AverageMeter(object):
         self.count = 0
 
     def update(self, val, n=1):
-        self.val = val
-        self.sum += val * n
+        self.sum += val 
         self.count += n
         self.avg = self.sum / self.count
 
@@ -86,7 +85,7 @@ if __name__ == '__main__':
             _, outputs = base_network(inputs)
             predictions = outputs.argmax(1)
             correct = torch.sum((predictions == labels).float())
-            accuracy.update(correct/len(outputs), len(outputs))
+            accuracy.update(correct, len(outputs))
     print_str = "\nCorrect Predictions: {}/{}".format(int(accuracy.sum), accuracy.count)
     print_str1 = '\ntest_acc:{:.4f}'.format(accuracy.avg)
     print(print_str + print_str1)
