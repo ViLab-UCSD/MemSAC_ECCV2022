@@ -102,7 +102,7 @@ class Encoder(nn.Module):
         self.bottleneck_0 = nn.Linear(feature_len, bn_dim)
         self.bottleneck_0.weight.data.normal_(0, 0.005)
         self.bottleneck_0.bias.data.fill_(0.1)
-        self.bottleneck_layer = nn.Sequential(self.bottleneck_0, nn.ReLU(), nn.BatchNorm1d(bn_dim))
+        self.bottleneck_layer = nn.Sequential(self.bottleneck_0, nn.BatchNorm1d(bn_dim), nn.ReLU())
         self.total_classes = total_classes
         if total_classes:
             self.classifier_layer = Classifier(bn_dim, total_classes)

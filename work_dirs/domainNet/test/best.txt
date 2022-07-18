@@ -1,7 +1,0 @@
-Best Accuracy file
-Best Accuracy file
-Best Accuracy : 0.4439 at iter: 05000
-Best Accuracy : 0.4773 at iter: 10000
-Best Accuracy : 0.5075 at iter: 15000
-Best Accuracy : 0.5183 at iter: 20000
-Best Accuracy : 0.5227 at iter: 25000
