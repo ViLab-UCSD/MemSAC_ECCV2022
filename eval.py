@@ -1,10 +1,11 @@
 import torch
-from model import Encoder
+from model.model import Encoder
 import numpy as np
 import argparse
 
-from load_images import ImageList
-import transforms
+from data_loader.load_images import ImageList
+import data_loader.transforms as transforms
+
 
 class AverageMeter(object):
     """Computes and stores the average and current value"""
