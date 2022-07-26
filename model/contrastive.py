@@ -13,14 +13,13 @@ class MSCLoss(nn.Module):
     def __init__(self, config_data):
         super().__init__()
         self.ranking_method = 'sim_ratio'
-        self.ranking_k = config_data['ranking_k'] #ranking_k = m for sim-ratio(knn confidence measure)
-        self.top_ranked_n = config_data['top_ranked_n'] # mu in number
+        self.ranking_k = config_data['ranking_k'] 
+        self.top_ranked_n = config_data['top_ranked_n'] 
         self.eps = 1e-9
         self.similarity_func = config_data['similarity_func']  # euclidean dist, cosine
         self.top_n_sim = config_data['top_n_sim'] # k for knn
         self.knn_method = config_data['knn_method'] #if 'ranking' use filtering, if 'classic' no filtering
         self.batch_size = config_data["batch_size"]
-        self.all_assigned = None # used in main file for collecting statistics
         self.conf_ind = None
         self.tau = config_data['tau']
 
@@ -77,7 +76,6 @@ class MSCLoss(nn.Module):
         flat_src_labels = source_labels.squeeze()
 
         assigned_tgt_labels, sorted_indices  = self.assign_labels_KNN(sim_matrix, source_labels)
-        self.all_assigned = assigned_tgt_labels
 
         ranking_score_list = []
 
