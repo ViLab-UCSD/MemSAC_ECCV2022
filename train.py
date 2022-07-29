@@ -80,7 +80,7 @@ if __name__ == '__main__':
     parser.add_argument('--bn-dim', type=int, default=256, help="bottleneck embedding dimension")
 
     ## Adaptation parameters
-    parser.add_argument('--only_da_iter', type=int, default=0,
+    parser.add_argument('--only_da_iter', type=int, default=100,
                         help="number of iterations when only DA loss works and MSC doesn't")
     parser.add_argument('--simi_func', type=str, default='cosine', choices=['cosine', 'euclidean', "gaussian"])
     parser.add_argument('--method', type=str, default="MemSAC")
