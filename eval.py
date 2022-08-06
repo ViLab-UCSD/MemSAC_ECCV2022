@@ -47,10 +47,10 @@ if __name__ == '__main__':
         }
     elif args.dataset == "domainNet":
         file_path = {
-        "real": "./data/DomainNet/real_test.txt" ,
-        "sketch": "./data/DomainNet/sketch_test.txt" ,
-        "painting": "./data/DomainNet/painting_test.txt" ,
-        "clipart": "./data/DomainNet/clipart_test.txt"}
+        "real": "./data_files/DomainNet/real_test.txt" ,
+        "sketch": "./data_files/DomainNet/sketch_test.txt" ,
+        "painting": "./data_files/DomainNet/painting_test.txt" ,
+        "clipart": "./data_files/DomainNet/clipart_test.txt"}
     else:
         raise NotImplementedError
 
