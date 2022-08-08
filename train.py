@@ -212,6 +212,9 @@ if __name__ == '__main__':
     with open(os.path.join(out_dir , "best.txt"), "a") as fh:
         fh.write("Best Accuracy file\n")
 
+    start_iter=1
+    best_acc = 0
+
     if os.path.exists(os.path.join(out_dir , "checkpoint.pth.tar")):
         print("Loading from pretrained model ...")
         checkpoint = torch.load(os.path.join(out_dir , "checkpoint.pth.tar"))
@@ -219,9 +222,6 @@ if __name__ == '__main__':
         discriminator.load_state_dict(checkpoint["discriminator_state_dict"])
         memory_network.load_state_dict(checkpoint["memory_state_dict"])
         start_iter = checkpoint["iter"]
-
-    start_iter=1
-    best_acc = 0
 
     for iter_num in range(start_iter, args.max_iteration + 1):
         base_network.train(True)
@@ -247,8 +247,6 @@ if __name__ == '__main__':
         features, logits = base_network(inputs)
         logits_source = logits[:len(inputs_source)]
         logits_target = logits[len(inputs_source):]
-
-        pseudo_labels_target = logits_target.argmax(1)
 
         ## Classifier Loss
         classifier_loss = criterion["classifier"](logits_source, labels_source)
